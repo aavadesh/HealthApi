@@ -1,4 +1,6 @@
-﻿using HealthApi.Models;
+﻿using HealthApi.Entities;
+using HealthApi.Exceptions;
+using HealthApi.Models;
 using HealthApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,9 +29,17 @@ namespace HealthApi
         public IActionResult Login([FromBody] LoginDto dto)
         {
             IActionResult response = Unauthorized();
-            string token = _accountService.GenerateJwt(dto);
-
-            response = Ok(new { token }); 
+            User user = _accountService.AuthenticateUser(dto);
+            if (user == null)
+            {
+                throw new BadRequestException("Invalid username or password");
+            }
+            var tokenString = _accountService.GenerateJwt(user, dto.Password);
+            response = Ok(new
+            {
+                token = tokenString,
+                userDetails = user,
+            });
             return response;
         }
     }

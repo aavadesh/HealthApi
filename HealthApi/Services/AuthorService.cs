@@ -104,7 +104,6 @@ namespace HealthApi.Services
         public AuthorViewModel GetByAuthorId(Guid authorID)
         {
             return _context.Authors.Where(x => x.Id == authorID)
-            .Include(a => a.AuthorBooks)
             .Select(a =>
                 new AuthorViewModel
                 {
@@ -119,7 +118,6 @@ namespace HealthApi.Services
         public List<AuthorViewModel> GetAuthorAll()
         {
             return _context.Authors
-            .Include(a => a.AuthorBooks)
             .Select(a =>
                 new AuthorViewModel
                 {

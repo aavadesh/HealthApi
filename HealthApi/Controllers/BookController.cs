@@ -56,7 +56,7 @@ namespace HealthApi
                 Book book = _mapper.Map<Book>(bookViewModel);
                 book.Slug = book.Name.GenerateSlug();
                 book.SlugName = book.Slug.GenerateSlug();
-                _bookService.Update(book.Id, book);
+                _bookService.Update(book);
                 return NoContent();
             }
             catch
