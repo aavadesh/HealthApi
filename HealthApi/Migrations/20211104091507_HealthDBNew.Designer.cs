@@ -4,14 +4,16 @@ using HealthApi.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HealthApi.Migrations
 {
     [DbContext(typeof(HealthDbContext))]
-    partial class HealthDbContextModelSnapshot : ModelSnapshot
+    [Migration("20211104091507_HealthDBNew")]
+    partial class HealthDBNew
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -97,10 +99,6 @@ namespace HealthApi.Migrations
 
             modelBuilder.Entity("HealthApi.Entities.BookContent", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("BookId")
                         .HasColumnType("uniqueidentifier");
 
@@ -110,8 +108,6 @@ namespace HealthApi.Migrations
 
                     b.Property<int>("PageNumber")
                         .HasColumnType("int");
-
-                    b.HasKey("Id");
 
                     b.HasIndex("BookId");
 

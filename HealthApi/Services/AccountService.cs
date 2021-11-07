@@ -16,7 +16,8 @@ namespace HealthApi.Services
     public interface IAccountService
     {
         void RegisterUser(RegisterUserDto dto);
-        string GenerateJwt(LoginDto dto);
+        string GenerateJwt(User user, string providedPassord);
+        User AuthenticateUser(LoginDto dto);
     }
     public class AccountService : IAccountService
     {
@@ -43,19 +44,15 @@ namespace HealthApi.Services
             _context.Users.Add(newUser);
             _context.SaveChanges();
         }
-
-        public string GenerateJwt(LoginDto dto)
+        public User AuthenticateUser(LoginDto dto)
         {
-            var user = _context.Users
+            return _context.Users
                 .Include(u => u.Role)
                 .FirstOrDefault(u => u.Email == dto.Email);
-
-            if (user is null)
-            {
-                throw new BadRequestException("Invalid username or password");
-            }
-
-            var result = _passwordHasher.VerifyHashedPassword(user, user.Password, dto.Password);
+        }
+        public string GenerateJwt(User user, string providedPassord)
+        {
+            var result = _passwordHasher.VerifyHashedPassword(user, user.Password, providedPassord);
             if (result == PasswordVerificationResult.Failed)
             {
                 throw new BadRequestException("Invalid username or password");

@@ -48,18 +48,6 @@ namespace HealthApi.Migrations
                     table.PrimaryKey("PK_Categories", x => x.Id);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Roles",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Roles", x => x.Id);
-                });
 
             migrationBuilder.CreateTable(
                 name: "AuthorBooks",
@@ -86,17 +74,17 @@ namespace HealthApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BooksContents",
+                name: "BookContents",
                 columns: table => new
                 {
                     BookId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Content = table.Column<string>(type: "nvarchar(max)", maxLength: 8000, nullable: true),
-                    PageNumer = table.Column<int>(type: "int", nullable: false)
+                    PageNumber = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.ForeignKey(
-                        name: "FK_BooksContents_Books_BookId",
+                        name: "FK_BookContents_Books_BookId",
                         column: x => x.BookId,
                         principalTable: "Books",
                         principalColumn: "Id",
@@ -127,26 +115,6 @@ namespace HealthApi.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Users",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Nationality = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    RoleId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Users", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Users_Roles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "Roles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AuthorBooks_AuthorId",
@@ -159,14 +127,9 @@ namespace HealthApi.Migrations
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BooksContents_BookId",
-                table: "BooksContents",
+                name: "IX_BookContents_BookId",
+                table: "BookContents",
                 column: "BookId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_RoleId",
-                table: "Users",
-                column: "RoleId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -178,10 +141,8 @@ namespace HealthApi.Migrations
                 name: "BookCategories");
 
             migrationBuilder.DropTable(
-                name: "BooksContents");
+                name: "BookContents");
 
-            migrationBuilder.DropTable(
-                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "Authors");
@@ -192,8 +153,6 @@ namespace HealthApi.Migrations
             migrationBuilder.DropTable(
                 name: "Books");
 
-            migrationBuilder.DropTable(
-                name: "Roles");
         }
     }
 }

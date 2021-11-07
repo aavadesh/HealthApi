@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HealthApi.Migrations
 {
     [DbContext(typeof(HealthDbContext))]
-    [Migration("20211102051940_HealthDB")]
+    [Migration("20211104084037_HealthDB")]
     partial class HealthDB
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -106,12 +106,12 @@ namespace HealthApi.Migrations
                         .HasMaxLength(8000)
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PageNumer")
+                    b.Property<int>("PageNumber")
                         .HasColumnType("int");
 
                     b.HasIndex("BookId");
 
-                    b.ToTable("BooksContents");
+                    b.ToTable("BookContents");
                 });
 
             modelBuilder.Entity("HealthApi.Entities.Category", b =>

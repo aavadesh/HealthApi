@@ -7,7 +7,6 @@ namespace HealthApi.Entities
     {
         public HealthDbContext(DbContextOptions<HealthDbContext> options) : base(options)
         {
-            
         }
         public DbSet<Author> Authors { get; set; }
         public DbSet<AuthorBook> AuthorBooks { get; set; }
@@ -20,7 +19,6 @@ namespace HealthApi.Entities
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<BookContent>().HasKey();
             modelBuilder.Entity<BookCategory>()
             .HasKey(bc => new { bc.BookId, bc.CategoryId });
             modelBuilder.Entity<BookCategory>()

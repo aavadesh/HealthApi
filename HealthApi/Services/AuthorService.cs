@@ -138,7 +138,8 @@ namespace HealthApi.Services
             AuthorBook authorBook  = _context.AuthorBooks.FirstOrDefault(d => d.AuthorId == authorID);
 
             _context.RemoveRange(author);
-            _context.RemoveRange(authorBook);
+            if (authorBook != null)
+                _context.RemoveRange(authorBook);
             _context.SaveChanges();
 
         }

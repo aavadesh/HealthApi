@@ -19,6 +19,9 @@ namespace HealthApi.Entities
         public string SlugName { get; set; }
         [NotMapped]
         public Guid CategoryId { get; set; }
+
+        [NotMapped]
+        public Guid AuthorId { get; set; }
         public ICollection<BookCategory> BookCategories { get; set; }
         public ICollection<AuthorBook> AuthorBooks { get; set; }
 
