@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using HealthApi.Entities;
-using HealthApi.Exceptions;
 using HealthApi.Models;
 using HealthApi.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -25,20 +24,18 @@ namespace HealthApi
         }
 
         [HttpDelete("{id}")]
-        public ActionResult Delete([FromRoute] Guid id)
+        public ActionResult DeleteById([FromRoute] Guid id)
         {
-            _bookService.RemoveAll(id);
+            _bookService.RemoveById(id);
 
             return NoContent();
         }
 
         [HttpPost]
-        public HttpResponseMessage Post([FromBody] BookViewModel bookViewModel)
+        public HttpResponseMessage Create([FromBody] BookDto bookDto)
         {
             Book book = new Book();
-            book  = _mapper.Map(bookViewModel, book);
-            book.Slug = book.Name.GenerateSlug();
-            book.SlugName = book.Slug.GenerateSlug();
+            book  = _mapper.Map(bookDto, book);
 
             _bookService.Create(book);
 
@@ -49,13 +46,11 @@ namespace HealthApi
 
             return response;
         }
-        public IActionResult Put([FromBody] BookViewModel bookViewModel)
+        public IActionResult Update([FromBody] BookDto bookDto)
         {
             try
             {
-                Book book = _mapper.Map<Book>(bookViewModel);
-                book.Slug = book.Name.GenerateSlug();
-                book.SlugName = book.Slug.GenerateSlug();
+                Book book = _mapper.Map<Book>(bookDto);
                 _bookService.Update(book);
                 return NoContent();
             }
@@ -66,31 +61,24 @@ namespace HealthApi
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Book> Get([FromRoute] Guid id)
+        public ActionResult<Book> GetById([FromRoute] Guid id)
         {
-            Book Book = _bookService.GetById(id);
-            return Ok(Book);
-        }
-
-        [HttpGet]
-        public ActionResult<List<Book>> Get()
-        {
-            var result = _bookService.GetAll();
+            var result = _bookService.GetByBookId(id);
             return Ok(result);
         }
 
         [HttpGet]
         [Route("GetBookAll")]
-        public ActionResult<List<BookViewModel>> GetBookAll()
+        public ActionResult<List<BookDto>> GetAll([FromQuery] int page, [FromQuery] int pageSize = 10)
         {
-            var result = _bookService.GetBookAll();
+            var result = _bookService.GetAll(page, pageSize);
             return Ok(result);
         }
 
-        [HttpGet("GetByBookId/{id}")]
-        public ActionResult<BookViewModel> GetByBookId([FromRoute] Guid id)
+        [HttpGet]
+        public ActionResult<List<BookDto>> GetAll()
         {
-            var result = _bookService.GetByBookId(id);
+            var result = _bookService.GetAll();
             return Ok(result);
         }
     }

@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using HealthApi.Entities;
+using HealthApi.Models;
 using HealthApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 
@@ -22,18 +24,17 @@ namespace HealthApi
         }
 
         [HttpDelete("{id}")]
-        public ActionResult Delete([FromRoute] Guid id)
+        public ActionResult DeleteById([FromRoute] Guid id)
         {
-            _categoryService.RemoveAll(id);
+            _categoryService.RemoveById(id);
 
             return NoContent();
         }
 
         [HttpPost]
-        public HttpResponseMessage Post([FromBody] Category category)
+        public HttpResponseMessage Create([FromBody] Category categoryDto)
         {
-            category.Slug = category.Name.GenerateSlug();
-            _categoryService.Create(category);
+            _categoryService.Create(categoryDto);
             var response = new HttpResponseMessage()
             {
                 StatusCode = HttpStatusCode.OK
@@ -42,12 +43,11 @@ namespace HealthApi
             return response;
         }
 
-        public IActionResult Put([FromBody] Category category)
+        public IActionResult Update([FromBody] Category categoryDto)
         {
             try
             {
-                category.Slug = category.Name.GenerateSlug();
-                _categoryService.Update(category.Id, category);
+                _categoryService.Update(categoryDto.Id, categoryDto);
                 return NoContent();
             }
             catch
@@ -57,15 +57,23 @@ namespace HealthApi
         }
 
 
-            [HttpGet("{id}")]
-        public ActionResult<Category> Get([FromRoute] Guid id)
+        [HttpGet("{id}")]
+        public ActionResult<Category> GetById([FromRoute] Guid id)
         {
             Category category = _categoryService.GetById(id);
             return Ok(category);
         }
 
         [HttpGet]
-        public ActionResult<List<Category>> Get()
+        [Route("GetCategoryAll")]
+        public ActionResult<List<Category>> GetAll([FromQuery] int page, [FromQuery] int pageSize = 10)
+        {
+            var result = _categoryService.GetAll(page, pageSize);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        public ActionResult<List<Category>> GetAll()
         {
             var result = _categoryService.GetAll();
             return Ok(result);

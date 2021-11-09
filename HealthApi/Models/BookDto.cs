@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HealthApi.Models
 {
-    public class BookViewModel
+    public class BookDto
     {
         public Guid Id { get; set; }
         [MaxLength(200)]

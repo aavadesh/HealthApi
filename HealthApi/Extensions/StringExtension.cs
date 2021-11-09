@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 
-namespace HealthApi
+namespace HealthApi.Extensions
 {
-    public static class Slug
+    public static class StringExtension
     {
         public static string GenerateSlug(this string phrase)
         {

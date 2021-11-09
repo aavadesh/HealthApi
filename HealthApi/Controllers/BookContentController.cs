@@ -20,17 +20,17 @@ namespace HealthApi
         }
 
         [HttpDelete("{id}")]
-        public ActionResult Delete([FromRoute] Guid id)
+        public ActionResult DeleteById([FromRoute] Guid id)
         {
-            _bookContentService.RemoveAll(id);
+            _bookContentService.RemoveById(id);
 
             return NoContent();
         }
 
         [HttpPost]
-        public HttpResponseMessage Post([FromBody] BookContent bookContent)
+        public HttpResponseMessage Create([FromBody] BookContent bookContentDto)
         {
-            _bookContentService.Create(bookContent);
+            _bookContentService.Create(bookContentDto);
             var response = new HttpResponseMessage()
             {
                 StatusCode = HttpStatusCode.OK
@@ -39,11 +39,11 @@ namespace HealthApi
             return response;
         }
 
-        public IActionResult Put([FromBody] BookContent bookContent)
+        public IActionResult Update([FromBody] BookContent bookContentDto)
         {
             try
             {
-                _bookContentService.Update(bookContent);
+                _bookContentService.Update(bookContentDto);
                 return NoContent();
             }
             catch
@@ -54,16 +54,16 @@ namespace HealthApi
 
 
         [HttpGet("{id}")]
-        public ActionResult<BookContent> Get([FromRoute] Guid id)
+        public ActionResult<BookContent> GetById([FromRoute] Guid id)
         {
             BookContent bookContent = _bookContentService.GetById(id);
             return Ok(bookContent);
         }
 
         [HttpGet]
-        public ActionResult<List<BookContentViewModel>> Get()
+        public ActionResult<List<BookContentDto>> GetAll([FromQuery] int page, [FromQuery] int pageSize = 10)
         {
-            var result = _bookContentService.GetAll();
+            var result = _bookContentService.GetAll(page, pageSize);
             return Ok(result);
         }
     }

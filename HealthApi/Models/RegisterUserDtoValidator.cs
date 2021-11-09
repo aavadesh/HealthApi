@@ -5,12 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
 using HealthApi.Entities;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
 namespace HealthApi.Models.Validators
 {
     public class RegisterUserDtoValidator : AbstractValidator<RegisterUserDto>
     {
-        public RegisterUserDtoValidator(HealthDbContext dbContext)
+        public RegisterUserDtoValidator(HealthDbContext dbContext, IWebHostEnvironment env)
         {
             RuleFor(x => x.Email)
                 .NotEmpty()
@@ -27,6 +29,15 @@ namespace HealthApi.Models.Validators
                     if (emailInUse)
                     {
                         context.AddFailure("Email", "That email is taken");
+                    }
+
+                    if (env.IsDevelopment())
+                    {
+                        context.AddFailure("Email", "That email is taken");
+                    }
+                    else
+                    {
+                        context.AddFailure("Email", "");
                     }
                 });
         }

@@ -4,6 +4,7 @@ using System.Linq;
 using AutoMapper;
 using HealthApi.Entities;
 using HealthApi.Exceptions;
+using HealthApi.Extensions;
 using HealthApi.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,13 +12,13 @@ namespace HealthApi.Services
 {
     public interface IBookService
     {
-        Guid Create(Book book);
+        Guid Create(Book bookDto);
         Book GetById(Guid bookID);
         List<Book> GetAll();
-        void RemoveAll(Guid bookID);
-        Book Update(Book book);
-        List<BookViewModel> GetBookAll();
-        BookViewModel GetByBookId(Guid bookID);
+        void RemoveById(Guid bookID);
+        Book Update(Book bookDto);
+        PageResult<BookDto> GetAll(int page, int pageSize);
+        BookDto GetByBookId(Guid bookID);
     }
 
     public class BookService : IBookService
@@ -30,37 +31,45 @@ namespace HealthApi.Services
             _context = context;
             _mapper = mapper;
         }
-        public Guid Create(Book obj)
+        public Guid Create(Book bookDto)
         {
-            _context.Books.Add(obj);
+            _context.Books.Add(bookDto);
+            bookDto.Slug = $"{bookDto.Name}".GenerateSlug();
+            bookDto.SlugName = $"{bookDto.Name}".GenerateSlug();
             _context.SaveChanges();
 
-            BookCategory bookCategory = new BookCategory();
-            bookCategory.BookId = obj.Id;
-            bookCategory.CategoryId = obj.CategoryId;
+            BookCategory bookCategory = new BookCategory
+            {
+                BookId = bookDto.Id,
+                CategoryId = bookDto.CategoryId
+            };
             _context.BookCategories.Add(bookCategory);
             _context.SaveChanges();
 
-            AuthorBook authorBook = new AuthorBook();
-            authorBook.BookId = obj.Id;
-            authorBook.AuthorId = obj.AuthorId;
+            AuthorBook authorBook = new AuthorBook
+            {
+                BookId = bookDto.Id,
+                AuthorId = bookDto.AuthorId
+            };
             _context.AuthorBooks.Add(authorBook);
             _context.SaveChanges();
 
-            return obj.Id;
+            return bookDto.Id;
         }
-        public Book Update(Book book)
+        public Book Update(Book bookDto)
         {
             try
             {
 
-                var bookEntity = GetById(book.Id);
+                var bookEntity = GetById(bookDto.Id);
                 if (bookEntity == null)
                 {
                     throw new NotFoundException("Book not found");
                 }
                 _context.Remove(bookEntity);
-                _context.Books.Add(book);
+                bookDto.Slug = $"{bookDto.Name}".GenerateSlug();
+                bookDto.SlugName = $"{bookDto.Name}".GenerateSlug();
+                _context.Books.Add(bookDto);
                 _context.SaveChanges();
 
                 BookCategory bookCategoryEntity = _context.BookCategories.FirstOrDefault(d => d.BookId == bookEntity.Id);
@@ -69,9 +78,11 @@ namespace HealthApi.Services
                     throw new NotFoundException("BookCategory not found");
                 }
                 _context.Remove(bookCategoryEntity);
-                BookCategory bookCategory = new BookCategory();
-                bookCategory.BookId = book.Id;
-                bookCategory.CategoryId = book.CategoryId;
+                BookCategory bookCategory = new BookCategory
+                {
+                    BookId = bookDto.Id,
+                    CategoryId = bookDto.CategoryId
+                };
                 _context.BookCategories.Add(bookCategory);
                 _context.SaveChanges();
 
@@ -81,9 +92,11 @@ namespace HealthApi.Services
                     throw new NotFoundException("Author not found");
                 }
                 _context.Remove(authorBookEntity);
-                AuthorBook authorBook = new AuthorBook();
-                authorBook.BookId = book.Id;
-                authorBook.AuthorId = book.AuthorId;
+                AuthorBook authorBook = new AuthorBook
+                {
+                    BookId = bookDto.Id,
+                    AuthorId = bookDto.AuthorId
+                };
                 _context.AuthorBooks.Add(authorBook);
                 _context.SaveChanges();
             }
@@ -91,7 +104,7 @@ namespace HealthApi.Services
             {
                 throw;
             }
-            return book;
+            return bookDto;
         }
         public Book GetById(Guid bookID)
         {
@@ -109,11 +122,11 @@ namespace HealthApi.Services
             return _context.Books.ToList();
         }
 
-        public BookViewModel GetByBookId(Guid bookID)
+        public BookDto GetByBookId(Guid bookID)
         {
             return _context.Books
            .Where(x => x.Id == bookID)
-           .Select(a => new BookViewModel
+           .Select(a => new BookDto
                     {
                         Id = a.Id,
                         Name = a.Name,
@@ -124,11 +137,11 @@ namespace HealthApi.Services
            }).FirstOrDefault();
         }
 
-        public List<BookViewModel> GetBookAll()
+        public PageResult<BookDto> GetAll(int page, int pageSize)
         {
-            return _context.Books
+            IQueryable<BookDto> result = _context.Books
            .Select(a =>
-               new BookViewModel
+               new BookDto
                {
                    Id = a.Id,
                    Name = a.Name,
@@ -138,10 +151,11 @@ namespace HealthApi.Services
                    CategoryName = a.BookCategories.Select(p => p.Category.Name).FirstOrDefault(),
                    AuthorId = a.AuthorBooks.Select(p => p.Author.Id).FirstOrDefault(),
                    AuthorFullName = a.AuthorBooks.Select(p => p.Author.Name + p.Author.Surname).FirstOrDefault(),
-               }).ToList();
+               });
+           return result.GetPaged(page, pageSize);
         }
 
-        public void RemoveAll(Guid bookID)
+        public void RemoveById(Guid bookID)
         {
             Book book = _context.Books.FirstOrDefault(d => d.Id == bookID);
             BookCategory bookCategory = _context.BookCategories.FirstOrDefault(d => d.BookId == bookID);

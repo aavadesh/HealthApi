@@ -34,7 +34,7 @@ namespace HealthApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var authenticationSettings = new AuthenticationSettings();
+            var authenticationSettings = new Setting();
 
             Configuration.GetSection("Authentication").Bind(authenticationSettings);
 

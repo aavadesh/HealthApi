@@ -4,16 +4,19 @@ using System.Linq;
 using AutoMapper;
 using HealthApi.Entities;
 using HealthApi.Exceptions;
+using HealthApi.Extensions;
+using HealthApi.Models;
 
 namespace HealthApi.Services
 {
     public interface ICategoryService
     {
-        Guid Create(Category category);
-        Category Update(Guid categoryID, Category obj);
+        Guid Create(Category categoryDto);
+        Category Update(Guid categoryID, Category categoryDto);
         Category GetById(Guid authorID);
-        List<Category> GetAll();
-        void RemoveAll(Guid authorID);
+        PageResult<Category> GetAll(int page, int pageSize);
+        void RemoveById(Guid authorID);
+        List<Book> GetAll();
     }
 
     public class CategoryService : ICategoryService
@@ -26,17 +29,16 @@ namespace HealthApi.Services
             _context = context;
             _mapper = mapper;
         }
-        public Guid Create(Category obj)
+        public Guid Create(Category categoryDto)
         {
-            Category category = _mapper.Map<Category>(obj);
-
-            _context.Categories.Add(category);
+            categoryDto.Slug = $"{categoryDto.Name}".GenerateSlug();
+            _context.Categories.Add(categoryDto);
             _context.SaveChanges();
 
-            return category.Id;
+            return categoryDto.Id;
         }
 
-        public Category Update(Guid categoryID, Category obj)
+        public Category Update(Guid categoryID, Category categoryDto)
         {
             try
             {
@@ -49,14 +51,15 @@ namespace HealthApi.Services
 
                 _context.Remove(categoryEntity);
 
-                _context.Categories.Add(obj);
+                categoryDto.Slug = $"{categoryDto.Name}".GenerateSlug();
+                _context.Categories.Add(categoryDto);
                 _context.SaveChanges();
             }
             catch (Exception ex)
             {
                 throw;
             }
-            return obj;
+            return categoryDto;
         }
 
         public Category GetById(Guid authorID)
@@ -69,13 +72,16 @@ namespace HealthApi.Services
 
             return category;
         }
-
-        public List<Category> GetAll()
+        public List<Book> GetAll()
         {
-            return _context.Categories.ToList();
+            return _context.Books.ToList();
+        }
+        public PageResult<Category> GetAll(int page, int pageSize)
+        {
+            return _context.Categories.GetPaged(page, pageSize);
         }
 
-        public void RemoveAll(Guid authorID)
+        public void RemoveById(Guid authorID)
         {
             Category category = _context.Categories.FirstOrDefault(d => d.Id == authorID);
 

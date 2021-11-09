@@ -4,6 +4,7 @@ using System.Linq;
 using AutoMapper;
 using HealthApi.Entities;
 using HealthApi.Exceptions;
+using HealthApi.Extensions;
 using HealthApi.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,13 +12,13 @@ namespace HealthApi.Services
 {
     public interface IAuthorService
     {
-        Guid Create(AuthorViewModel authorViewModel);
+        Guid Create(AuthorDto authorDto);
         Author GetById(Guid authorID);
         List<Author> GetAll();
-        void RemoveAll(Guid authorID);
-        Author Update(AuthorViewModel authorViewModel);
-        List<AuthorViewModel> GetAuthorAll();
-        AuthorViewModel GetByAuthorId(Guid bookID);
+        void RemoveById(Guid authorID);
+        Author Update(AuthorDto authorDto);
+        PageResult<AuthorDto> GetAll(int page, int pageSize);
+        AuthorDto GetByAuthorId(Guid bookID);
     }
 
     public class AuthorService : IAuthorService
@@ -30,29 +31,29 @@ namespace HealthApi.Services
             _context = context;
             _mapper = mapper;
         }
-        public Guid Create(AuthorViewModel authorViewModel)
+        public Guid Create(AuthorDto authorDto)
         {
 
             Author author = new Author();
-            author = _mapper.Map(authorViewModel, author);
-            author.Slug = $"{author.Name.GenerateSlug()} {author.Surname.GenerateSlug()}";
+            author = _mapper.Map(authorDto, author);
+            author.Slug = $"{author.Name} {author.Surname}".GenerateSlug();
             _context.Authors.Add(author);
             _context.SaveChanges();
 
             AuthorBook authorBook = new AuthorBook();
-            authorBook.BookId = authorViewModel.BookId;
+            authorBook.BookId = authorDto.BookId;
             authorBook.AuthorId = author.Id;
             _context.AuthorBooks.Add(authorBook);
             _context.SaveChanges();
 
             return author.Id;
         }
-        public Author Update(AuthorViewModel authorViewModel)
+        public Author Update(AuthorDto authorDto)
         {
             Author author = null;
             try
             {
-                var authorEntity = GetById(authorViewModel.Id);
+                var authorEntity = GetById(authorDto.Id);
                 if (authorEntity == null)
                 {
                     throw new NotFoundException("Author not found");
@@ -60,7 +61,7 @@ namespace HealthApi.Services
 
                 _context.Remove(authorEntity);
 
-                AuthorBook authorBookEntity = _context.AuthorBooks.FirstOrDefault(d => d.AuthorId == authorViewModel.Id);
+                AuthorBook authorBookEntity = _context.AuthorBooks.FirstOrDefault(d => d.AuthorId == authorDto.Id);
                 if (authorBookEntity == null)
                 {
                     throw new NotFoundException("AuthorBook not found");
@@ -68,14 +69,16 @@ namespace HealthApi.Services
                 _context.Remove(authorBookEntity);
 
                 author = new Author();
-                author = _mapper.Map(authorViewModel, author);
-                author.Slug = $"{author.Name.GenerateSlug()} {author.Surname.GenerateSlug()}";
+                author = _mapper.Map(authorDto, author);
+                author.Slug = $"{author.Name} {author.Surname}".GenerateSlug();
                 _context.Authors.Add(author);
                 _context.SaveChanges();
 
-                AuthorBook authorBook = new AuthorBook();
-                authorBook.BookId = authorViewModel.BookId;
-                authorBook.AuthorId = author.Id;
+                AuthorBook authorBook = new AuthorBook
+                {
+                    BookId = authorDto.BookId,
+                    AuthorId = author.Id
+                };
                 _context.AuthorBooks.Add(authorBook);
                 _context.SaveChanges();
             }
@@ -101,11 +104,11 @@ namespace HealthApi.Services
             return _context.Authors.ToList();
         }
 
-        public AuthorViewModel GetByAuthorId(Guid authorID)
+        public AuthorDto GetByAuthorId(Guid authorID)
         {
             return _context.Authors.Where(x => x.Id == authorID)
             .Select(a =>
-                new AuthorViewModel
+                new AuthorDto
                 {
                     Id = a.Id,
                     Name = a.Name,
@@ -115,11 +118,11 @@ namespace HealthApi.Services
                 }).FirstOrDefault();
         }
 
-        public List<AuthorViewModel> GetAuthorAll()
+        public PageResult<AuthorDto> GetAll(int page, int pageSize)
         {
-            return _context.Authors
+            IQueryable<AuthorDto> result = _context.Authors
             .Select(a =>
-                new AuthorViewModel
+                new AuthorDto
                 {
                     Id = a.Id,
                     Name = a.Name,
@@ -127,10 +130,12 @@ namespace HealthApi.Services
                     Surname = a.Surname,
                     BookId = a.AuthorBooks.Select(p => p.Book.Id).FirstOrDefault(),
                     BookName = a.AuthorBooks.Select(p => p.Book.Name).FirstOrDefault()
-                }).ToList();
+                });
+
+            return result.GetPaged(page, pageSize);
         }
 
-        public void RemoveAll(Guid authorID)
+        public void RemoveById(Guid authorID)
         {
             Author author = _context.Authors.FirstOrDefault(d => d.Id == authorID);
             AuthorBook authorBook  = _context.AuthorBooks.FirstOrDefault(d => d.AuthorId == authorID);

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HealthApi
 {
-    public class AuthenticationSettings
+    public class Setting
     {
         public string JwtKey { get; set; }
         public int JwtExpireDays { get; set; }

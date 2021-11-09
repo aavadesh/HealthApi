@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HealthApi.Entities
 {
-    [Keyless]
     public class AuthorBook
     {
         [Key]

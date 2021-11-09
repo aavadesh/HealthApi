@@ -23,13 +23,13 @@ namespace HealthApi.Services
     {
         private readonly HealthDbContext _context;
         private readonly IPasswordHasher<User> _passwordHasher;
-        private readonly AuthenticationSettings _authenticationSettings;
+        private readonly Setting _settings;
 
-        public AccountService(HealthDbContext context, IPasswordHasher<User> passwordHasher, AuthenticationSettings authenticationSettings)
+        public AccountService(HealthDbContext context, IPasswordHasher<User> passwordHasher, Setting settings)
         {
             _context = context;
             _passwordHasher = passwordHasher;
-            _authenticationSettings = authenticationSettings;
+            _settings = settings;
         }
         public void RegisterUser(RegisterUserDto dto)
         {
@@ -72,12 +72,12 @@ namespace HealthApi.Services
                     );
             }
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authenticationSettings.JwtKey));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.JwtKey));
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.Now.AddDays(_authenticationSettings.JwtExpireDays);
+            var expires = DateTime.Now.AddDays(_settings.JwtExpireDays);
 
-            var token = new JwtSecurityToken(_authenticationSettings.JwtIssuer,
-                _authenticationSettings.JwtIssuer,
+            var token = new JwtSecurityToken(_settings.JwtIssuer,
+                _settings.JwtIssuer,
                 claims,
                 expires: expires,
                 signingCredentials: cred);

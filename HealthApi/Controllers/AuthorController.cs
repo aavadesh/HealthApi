@@ -24,17 +24,17 @@ namespace HealthApi
         }
 
         [HttpDelete("{id}")]
-        public ActionResult Delete([FromRoute] Guid id)
+        public ActionResult DeleteById([FromRoute] Guid id)
         {
-            _authorService.RemoveAll(id);
+            _authorService.RemoveById(id);
 
             return NoContent();
         }
 
         [HttpPost]
-        public HttpResponseMessage Post([FromBody] AuthorViewModel authorViewModel)
+        public HttpResponseMessage Create([FromBody] AuthorDto authorDto)
         {
-            _authorService.Create(authorViewModel);
+            _authorService.Create(authorDto);
 
             var response = new HttpResponseMessage()
             {
@@ -43,11 +43,11 @@ namespace HealthApi
 
             return response;
         }
-        public IActionResult Put([FromBody] AuthorViewModel authorViewModel)
+        public IActionResult Update([FromBody] AuthorDto authorDto)
         {
             try
             {
-                _authorService.Update(authorViewModel);
+                _authorService.Update(authorDto);
                 return NoContent();
             }
             catch
@@ -57,31 +57,24 @@ namespace HealthApi
         }
 
         [HttpGet("{id}")]
-        public ActionResult<Author> Get([FromRoute] Guid id)
+        public ActionResult<Author> GetById([FromRoute] Guid id)
         {
-            Author author = _authorService.GetById(id);
-            return Ok(author);
-        }
-
-        [HttpGet]
-        public ActionResult<List<Author>> Get()
-        {
-            var result = _authorService.GetAll();
+            var result = _authorService.GetByAuthorId(id);
             return Ok(result);
         }
 
         [HttpGet]
         [Route("GetAuthorAll")]
-        public ActionResult<List<AuthorViewModel>> GetAuthorAll()
+        public ActionResult<List<AuthorDto>> GetAll([FromQuery] int page, [FromQuery] int pageSize = 10)
         {
-            var result = _authorService.GetAuthorAll();
+           var result = _authorService.GetAll(page, pageSize);
             return Ok(result);
         }
 
-        [HttpGet("GetByAuthorId/{id}")]
-        public ActionResult<AuthorViewModel> GetByAuthorId([FromRoute] Guid id)
+        [HttpGet]
+        public ActionResult<List<Category>> GetAll()
         {
-            var result = _authorService.GetByAuthorId(id);
+            var result = _authorService.GetAll();
             return Ok(result);
         }
     }

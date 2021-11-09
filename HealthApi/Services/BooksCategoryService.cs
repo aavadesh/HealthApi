@@ -9,11 +9,11 @@ namespace HealthApi.Services
 {
     public interface IBooksCategoryService
     {
-        Guid Create(BookCategory bookCategory);
+        Guid Create(BookCategory bookCategoryDto);
         BookCategory GetById(Guid bookCategoryID);
         List<BookCategory> GetAll();
-        void RemoveAll(Guid bookCategoryID);
-        BookCategory Update(Guid bookCategoryID, BookCategory obj);
+        void RemoveById(Guid bookCategoryID);
+        BookCategory Update(Guid bookCategoryID, BookCategory bookCategoryDto);
     }
 
     public class BooksCategoryService : IBooksCategoryService
@@ -26,16 +26,14 @@ namespace HealthApi.Services
             _context = context;
             _mapper = mapper;
         }
-        public Guid Create(BookCategory obj)
+        public Guid Create(BookCategory bookCategoryDto)
         {
-            BookCategory bookCategory = _mapper.Map<BookCategory>(obj);
-
-            _context.BookCategories.Add(bookCategory);
+            _context.BookCategories.Add(bookCategoryDto);
             _context.SaveChanges();
 
-            return bookCategory.BookId;
+            return bookCategoryDto.BookId;
         }
-        public BookCategory Update(Guid bookCategoryID, BookCategory obj)
+        public BookCategory Update(Guid bookCategoryID, BookCategory bookCategoryDto)
         {
             try
             {
@@ -48,14 +46,14 @@ namespace HealthApi.Services
 
                 _context.Remove(bookCategoryEntity);
 
-                _context.BookCategories.Add(obj);
+                _context.BookCategories.Add(bookCategoryDto);
                 _context.SaveChanges();
             }
             catch (Exception ex)
             {
                 throw;
             }
-            return obj;
+            return bookCategoryDto;
         }
         public BookCategory GetById(Guid bookCategoryID)
         {
@@ -73,7 +71,7 @@ namespace HealthApi.Services
             return _context.BookCategories.ToList();
         }
 
-        public void RemoveAll(Guid bookID)
+        public void RemoveById(Guid bookID)
         {
             BookCategory bookCategory = _context.BookCategories.FirstOrDefault(d => d.BookId == bookID);
 

@@ -5,17 +5,16 @@ using AutoMapper;
 using HealthApi.Entities;
 using HealthApi.Exceptions;
 using HealthApi.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace HealthApi.Services
 {
     public interface IBookContentService
     {
-        Guid Create(BookContent bookContent);
-        BookContent Update(BookContent bookContent);
+        Guid Create(BookContent bookContentDto);
+        BookContent Update(BookContent bookContentDto);
         BookContent GetById(Guid bookID);
-        List<BookContentViewModel> GetAll();
-        void RemoveAll(Guid bookID);
+        PageResult<BookContentDto> GetAll(int page, int pageSize);
+        void RemoveById(Guid bookID);
     }
 
     public class BookContentService : IBookContentService
@@ -28,44 +27,44 @@ namespace HealthApi.Services
             _context = context;
             _mapper = mapper;
         }
-        public List<BookContentViewModel> GetAll()
+        public PageResult<BookContentDto> GetAll(int page, int pageSize)
         {
-            return (from e in _context.BookContents
+            IQueryable<BookContentDto> result = (from e in _context.BookContents
                     join d in _context.Books on e.BookId equals d.Id
-                    select new BookContentViewModel
+                    select new BookContentDto
                     {
                         Id = e.Id,
                         BookName = d.Name,
                         BookId = d.Id,
                         Content = e.Content,
                         pageNumber = e.PageNumber
-                    }).OrderBy(x => x.BookName).ThenBy(x => x.pageNumber).ToList();
+                    }).OrderBy(x => x.BookName).ThenBy(x => x.pageNumber);
+
+            return result.GetPaged(page, pageSize);
         }
 
-        public Guid Create(BookContent obj)
+        public Guid Create(BookContent bookContentDto)
         {
-            BookContent bookContent = _mapper.Map<BookContent>(obj);
-
-            _context.BookContents.Add(bookContent);
+            _context.BookContents.Add(bookContentDto);
             _context.SaveChanges();
 
-            return bookContent.BookId;
+            return bookContentDto.BookId;
         } 
         public BookContent GetById(Guid bookID)
         {
            return _context.BookContents.FirstOrDefault(x => x.BookId == bookID);
         }
 
-        public void RemoveAll(Guid bookID)
+        public void RemoveById(Guid bookID)
         {
             BookContent bookContent = _context.BookContents.FirstOrDefault(d => d.BookId == bookID);
             _context.RemoveRange(bookContent);
         } 
-        public BookContent Update(BookContent bookContent)
+        public BookContent Update(BookContent bookContentDto)
         {
             try
             {
-                var bookContentEntity = GetById(bookContent.BookId);
+                var bookContentEntity = GetById(bookContentDto.BookId);
                 if (bookContentEntity == null)
                 {
                     throw new NotFoundException("BookContent not found");
@@ -73,14 +72,14 @@ namespace HealthApi.Services
 
                 _context.Remove(bookContentEntity);
 
-                _context.BookContents.Add(bookContent);
+                _context.BookContents.Add(bookContentDto);
                 _context.SaveChanges();
             }
             catch (Exception ex)
             {
                 throw;
             }
-            return bookContent;
+            return bookContentDto;
         }
     }
 }
