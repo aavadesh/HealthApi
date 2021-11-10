@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HealthApi.Migrations
 {
     [DbContext(typeof(HealthDbContext))]
-    [Migration("20211104084037_HealthDB")]
-    partial class HealthDB
+    [Migration("20211110164510_HealthDBApi")]
+    partial class HealthDBApi
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -84,21 +84,25 @@ namespace HealthApi.Migrations
 
             modelBuilder.Entity("HealthApi.Entities.BookCategory", b =>
                 {
-                    b.Property<Guid>("BookId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("BookId", "CategoryId");
+                    b.Property<Guid>("BookId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.HasIndex("CategoryId");
+                    b.HasKey("CategoryId", "BookId");
+
+                    b.HasIndex("BookId");
 
                     b.ToTable("BookCategories");
                 });
 
             modelBuilder.Entity("HealthApi.Entities.BookContent", b =>
                 {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("BookId")
                         .HasColumnType("uniqueidentifier");
 
@@ -108,6 +112,8 @@ namespace HealthApi.Migrations
 
                     b.Property<int>("PageNumber")
                         .HasColumnType("int");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("BookId");
 
@@ -155,9 +161,6 @@ namespace HealthApi.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Nationality")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Password")

@@ -82,15 +82,15 @@ namespace HealthApi.Migrations
 
             modelBuilder.Entity("HealthApi.Entities.BookCategory", b =>
                 {
-                    b.Property<Guid>("BookId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("BookId", "CategoryId");
+                    b.Property<Guid>("BookId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.HasIndex("CategoryId");
+                    b.HasKey("CategoryId", "BookId");
+
+                    b.HasIndex("BookId");
 
                     b.ToTable("BookCategories");
                 });
@@ -159,9 +159,6 @@ namespace HealthApi.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Nationality")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Password")

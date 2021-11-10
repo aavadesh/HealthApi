@@ -30,15 +30,6 @@ namespace HealthApi.Models.Validators
                     {
                         context.AddFailure("Email", "That email is taken");
                     }
-
-                    if (env.IsDevelopment())
-                    {
-                        context.AddFailure("Email", "That email is taken");
-                    }
-                    else
-                    {
-                        context.AddFailure("Email", "");
-                    }
                 });
         }
     }

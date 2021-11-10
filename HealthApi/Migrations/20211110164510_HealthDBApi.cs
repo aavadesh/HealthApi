@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace HealthApi.Migrations
 {
-    public partial class HealthDB : Migration
+    public partial class HealthDBApi : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -48,6 +48,18 @@ namespace HealthApi.Migrations
                     table.PrimaryKey("PK_Categories", x => x.Id);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Roles",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Roles", x => x.Id);
+                });
 
             migrationBuilder.CreateTable(
                 name: "AuthorBooks",
@@ -58,7 +70,6 @@ namespace HealthApi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AuthorBooks", x => new { x.BookId, x.AuthorId });
                     table.ForeignKey(
                         name: "FK_AuthorBooks_Authors_AuthorId",
                         column: x => x.AuthorId,
@@ -77,12 +88,14 @@ namespace HealthApi.Migrations
                 name: "BookContents",
                 columns: table => new
                 {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     BookId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Content = table.Column<string>(type: "nvarchar(max)", maxLength: 8000, nullable: true),
                     PageNumber = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
+                    table.PrimaryKey("PK_BookContents", x => x.Id);
                     table.ForeignKey(
                         name: "FK_BookContents_Books_BookId",
                         column: x => x.BookId,
@@ -100,7 +113,6 @@ namespace HealthApi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BookCategories", x => new { x.BookId, x.CategoryId });
                     table.ForeignKey(
                         name: "FK_BookCategories_Books_BookId",
                         column: x => x.BookId,
@@ -115,6 +127,25 @@ namespace HealthApi.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RoleId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Users_Roles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "Roles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AuthorBooks_AuthorId",
@@ -122,14 +153,19 @@ namespace HealthApi.Migrations
                 column: "AuthorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BookCategories_CategoryId",
+                name: "IX_BookCategories_BookId",
                 table: "BookCategories",
-                column: "CategoryId");
+                column: "BookId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BookContents_BookId",
                 table: "BookContents",
                 column: "BookId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_RoleId",
+                table: "Users",
+                column: "RoleId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -143,6 +179,8 @@ namespace HealthApi.Migrations
             migrationBuilder.DropTable(
                 name: "BookContents");
 
+            migrationBuilder.DropTable(
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "Authors");
@@ -153,6 +191,8 @@ namespace HealthApi.Migrations
             migrationBuilder.DropTable(
                 name: "Books");
 
+            migrationBuilder.DropTable(
+                name: "Roles");
         }
     }
 }

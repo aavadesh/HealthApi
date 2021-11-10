@@ -12,13 +12,12 @@ namespace HealthApi.Services
 {
     public interface IAuthorService
     {
-        Guid Create(AuthorDto authorDto);
+        Guid Create(Author authorDto);
         Author GetById(Guid authorID);
         List<Author> GetAll();
         void RemoveById(Guid authorID);
-        Author Update(AuthorDto authorDto);
-        PageResult<AuthorDto> GetAll(int page, int pageSize);
-        AuthorDto GetByAuthorId(Guid bookID);
+        Author Update(Author authorDto);
+        PageResult<Author> GetAll(int page, int pageSize);
     }
 
     public class AuthorService : IAuthorService
@@ -31,26 +30,15 @@ namespace HealthApi.Services
             _context = context;
             _mapper = mapper;
         }
-        public Guid Create(AuthorDto authorDto)
+        public Guid Create(Author authorDto)
         {
-
-            Author author = new Author();
-            author = _mapper.Map(authorDto, author);
-            author.Slug = $"{author.Name} {author.Surname}".GenerateSlug();
-            _context.Authors.Add(author);
+            authorDto.Slug = $"{authorDto.Name} {authorDto.Surname}".GenerateSlug();
+            _context.Authors.Add(authorDto);
             _context.SaveChanges();
-
-            AuthorBook authorBook = new AuthorBook();
-            authorBook.BookId = authorDto.BookId;
-            authorBook.AuthorId = author.Id;
-            _context.AuthorBooks.Add(authorBook);
-            _context.SaveChanges();
-
-            return author.Id;
+            return authorDto.Id;
         }
-        public Author Update(AuthorDto authorDto)
+        public Author Update(Author authorDto)
         {
-            Author author = null;
             try
             {
                 var authorEntity = GetById(authorDto.Id);
@@ -58,35 +46,17 @@ namespace HealthApi.Services
                 {
                     throw new NotFoundException("Author not found");
                 }
-
                 _context.Remove(authorEntity);
 
-                AuthorBook authorBookEntity = _context.AuthorBooks.FirstOrDefault(d => d.AuthorId == authorDto.Id);
-                if (authorBookEntity == null)
-                {
-                    throw new NotFoundException("AuthorBook not found");
-                }
-                _context.Remove(authorBookEntity);
-
-                author = new Author();
-                author = _mapper.Map(authorDto, author);
-                author.Slug = $"{author.Name} {author.Surname}".GenerateSlug();
-                _context.Authors.Add(author);
-                _context.SaveChanges();
-
-                AuthorBook authorBook = new AuthorBook
-                {
-                    BookId = authorDto.BookId,
-                    AuthorId = author.Id
-                };
-                _context.AuthorBooks.Add(authorBook);
+                authorDto.Slug = $"{authorDto.Name} {authorDto.Surname}".GenerateSlug();
+                _context.Authors.Add(authorDto);
                 _context.SaveChanges();
             }
             catch (Exception ex)
             {
                 throw;
             }
-            return author;
+            return authorDto;
         }
         public Author GetById(Guid authorID)
         {
@@ -104,45 +74,16 @@ namespace HealthApi.Services
             return _context.Authors.ToList();
         }
 
-        public AuthorDto GetByAuthorId(Guid authorID)
+        public PageResult<Author> GetAll(int page, int pageSize)
         {
-            return _context.Authors.Where(x => x.Id == authorID)
-            .Select(a =>
-                new AuthorDto
-                {
-                    Id = a.Id,
-                    Name = a.Name,
-                    Slug = a.Slug,
-                    Surname = a.Surname,
-                    BookId = a.AuthorBooks.Select(p => p.Book.Id).FirstOrDefault()
-                }).FirstOrDefault();
-        }
-
-        public PageResult<AuthorDto> GetAll(int page, int pageSize)
-        {
-            IQueryable<AuthorDto> result = _context.Authors
-            .Select(a =>
-                new AuthorDto
-                {
-                    Id = a.Id,
-                    Name = a.Name,
-                    Slug = a.Slug,
-                    Surname = a.Surname,
-                    BookId = a.AuthorBooks.Select(p => p.Book.Id).FirstOrDefault(),
-                    BookName = a.AuthorBooks.Select(p => p.Book.Name).FirstOrDefault()
-                });
-
-            return result.GetPaged(page, pageSize);
+            return _context.Authors.GetPaged(page, pageSize);
         }
 
         public void RemoveById(Guid authorID)
         {
             Author author = _context.Authors.FirstOrDefault(d => d.Id == authorID);
-            AuthorBook authorBook  = _context.AuthorBooks.FirstOrDefault(d => d.AuthorId == authorID);
 
             _context.RemoveRange(author);
-            if (authorBook != null)
-                _context.RemoveRange(authorBook);
             _context.SaveChanges();
 
         }

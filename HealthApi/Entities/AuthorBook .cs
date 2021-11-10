@@ -6,11 +6,11 @@ namespace HealthApi.Entities
 {
     public class AuthorBook
     {
-        [Key]
+       // [Key]
         public Guid BookId { get; set; }
         public Book Book { get; set; }
-        [Key]
-        public Guid AuthorId { get; set; }
-        public Author Author { get; set; }
+       // [Key]
+        public virtual Guid AuthorId { get; set; }
+        public virtual Author Author { get; set; }
     }
 }

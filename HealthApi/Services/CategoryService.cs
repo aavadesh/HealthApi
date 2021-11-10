@@ -16,7 +16,7 @@ namespace HealthApi.Services
         Category GetById(Guid authorID);
         PageResult<Category> GetAll(int page, int pageSize);
         void RemoveById(Guid authorID);
-        List<Book> GetAll();
+        List<Category> GetAll();
     }
 
     public class CategoryService : ICategoryService
@@ -72,9 +72,9 @@ namespace HealthApi.Services
 
             return category;
         }
-        public List<Book> GetAll()
+        public List<Category> GetAll()
         {
-            return _context.Books.ToList();
+            return _context.Categories.ToList();
         }
         public PageResult<Category> GetAll(int page, int pageSize)
         {

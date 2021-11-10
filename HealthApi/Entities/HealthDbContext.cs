@@ -19,32 +19,8 @@ namespace HealthApi.Entities
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<BookCategory>()
-            .HasKey(bc => new { bc.BookId, bc.CategoryId });
-            modelBuilder.Entity<BookCategory>()
-                .HasOne(bc => bc.Book)
-                .WithMany(b => b.BookCategories)
-                .HasForeignKey(bc => bc.BookId);
-            modelBuilder.Entity<BookCategory>().HasKey(vf => new { vf.BookId, vf.CategoryId });
-            modelBuilder.Entity<AuthorBook>()
-          .HasKey(bc => new { bc.BookId, bc.AuthorId });
-            modelBuilder.Entity<AuthorBook>()
-                .HasOne(bc => bc.Book)
-                .WithMany(b => b.AuthorBooks)
-                .HasForeignKey(bc => bc.BookId);
-            modelBuilder.Entity<AuthorBook>()
-                .HasOne(bc => bc.Author)
-                .WithMany(c => c.AuthorBooks)
-                .HasForeignKey(bc => bc.AuthorId);
-            modelBuilder.Entity<BookCategory>().HasKey(sc => new { sc.BookId, sc.CategoryId });
-            modelBuilder.Entity<BookCategory>()
-                .HasOne<Book>(sc => sc.Book)
-                .WithMany(s => s.BookCategories)
-                .HasForeignKey(sc => sc.BookId);
-            modelBuilder.Entity<BookCategory>()
-                .HasOne<Category>(sc => sc.Category)
-                .WithMany(s => s.BookCategories)
-                .HasForeignKey(sc => sc.CategoryId);
+            modelBuilder.Entity<BookCategory>().HasKey(sc => new { sc.CategoryId, sc.BookId });
+            modelBuilder.Entity<AuthorBook>().HasKey(sc => new { sc.BookId, sc.AuthorId });
         }
     }
 }

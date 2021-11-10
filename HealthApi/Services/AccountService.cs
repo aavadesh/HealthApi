@@ -65,12 +65,12 @@ namespace HealthApi.Services
 
             };
 
-            if (!string.IsNullOrEmpty(user.Nationality))
-            {
-                claims.Add(
-                    new Claim("Nationality", user.Nationality)
-                    );
-            }
+            //if (!string.IsNullOrEmpty(user.Nationality))
+            //{
+            //    claims.Add(
+            //        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            //        );
+            //}
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.JwtKey));
             var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

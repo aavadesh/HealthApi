@@ -32,7 +32,7 @@ namespace HealthApi
         }
 
         [HttpPost]
-        public HttpResponseMessage Create([FromBody] AuthorDto authorDto)
+        public HttpResponseMessage Create([FromBody] Author authorDto)
         {
             _authorService.Create(authorDto);
 
@@ -43,7 +43,7 @@ namespace HealthApi
 
             return response;
         }
-        public IActionResult Update([FromBody] AuthorDto authorDto)
+        public IActionResult Update([FromBody] Author authorDto)
         {
             try
             {
@@ -59,20 +59,20 @@ namespace HealthApi
         [HttpGet("{id}")]
         public ActionResult<Author> GetById([FromRoute] Guid id)
         {
-            var result = _authorService.GetByAuthorId(id);
+            var result = _authorService.GetById(id);
             return Ok(result);
         }
 
         [HttpGet]
         [Route("GetAuthorAll")]
-        public ActionResult<List<AuthorDto>> GetAll([FromQuery] int page, [FromQuery] int pageSize = 10)
+        public ActionResult<List<Author>> GetAll([FromQuery] int page, [FromQuery] int pageSize = 10)
         {
            var result = _authorService.GetAll(page, pageSize);
             return Ok(result);
         }
 
         [HttpGet]
-        public ActionResult<List<Category>> GetAll()
+        public ActionResult<List<Author>> GetAll()
         {
             var result = _authorService.GetAll();
             return Ok(result);

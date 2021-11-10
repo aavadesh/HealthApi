@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -7,12 +8,12 @@ namespace HealthApi.Entities
 {
     public class BookCategory
     {
-        [Key]
+       // [Key]
         public Guid BookId { get; set; }
 
-        [Key]
+       // [Key]
         public Guid CategoryId { get; set; }
-        public Book Book { get; set; }
-        public Category Category { get; set; }
+        public virtual Book Book { get; set; }
+        public virtual Category Category { get; set; }
     }
 }

@@ -158,11 +158,8 @@ namespace HealthApi.Services
         public void RemoveById(Guid bookID)
         {
             Book book = _context.Books.FirstOrDefault(d => d.Id == bookID);
-            BookCategory bookCategory = _context.BookCategories.FirstOrDefault(d => d.BookId == bookID);
 
             _context.RemoveRange(book);
-            if (bookCategory != null)
-                _context.RemoveRange(bookCategory);
             _context.SaveChanges();
 
         }

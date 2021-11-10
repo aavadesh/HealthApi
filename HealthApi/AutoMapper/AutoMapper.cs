@@ -9,7 +9,6 @@ namespace HealthApi
         public AutoMapper()
         {
             CreateMap<BookDto, Book>();
-            CreateMap<AuthorDto, Author>();
         }
     }
 }
