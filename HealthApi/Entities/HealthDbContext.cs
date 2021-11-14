@@ -21,6 +21,20 @@ namespace HealthApi.Entities
         {
             modelBuilder.Entity<BookCategory>().HasKey(sc => new { sc.CategoryId, sc.BookId });
             modelBuilder.Entity<AuthorBook>().HasKey(sc => new { sc.BookId, sc.AuthorId });
+
+            modelBuilder.Entity<Role>()
+        .HasData(
+            new Role
+            {
+                Id = 1,
+                Name = "user"
+            },
+            new Role
+            {
+                Id = 2,
+                Name = "admin"
+            }
+        );
         }
     }
 }

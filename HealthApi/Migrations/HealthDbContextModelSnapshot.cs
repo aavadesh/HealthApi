@@ -150,6 +150,18 @@ namespace HealthApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "user"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "admin"
+                        });
                 });
 
             modelBuilder.Entity("HealthApi.Entities.User", b =>

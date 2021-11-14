@@ -147,6 +147,16 @@ namespace HealthApi.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "Roles",
+                columns: new[] { "Id", "Name" },
+                values: new object[] { 1, "user" });
+
+            migrationBuilder.InsertData(
+                table: "Roles",
+                columns: new[] { "Id", "Name" },
+                values: new object[] { 2, "admin" });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AuthorBooks_AuthorId",
                 table: "AuthorBooks",

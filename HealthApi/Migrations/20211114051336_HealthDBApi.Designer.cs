@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HealthApi.Migrations
 {
     [DbContext(typeof(HealthDbContext))]
-    [Migration("20211110164510_HealthDBApi")]
+    [Migration("20211114051336_HealthDBApi")]
     partial class HealthDBApi
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -152,6 +152,18 @@ namespace HealthApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "user"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "admin"
+                        });
                 });
 
             modelBuilder.Entity("HealthApi.Entities.User", b =>

@@ -1,10 +1,6 @@
 ﻿using HealthApi.Models;
-using Microsoft.AspNetCore.Http;
+using HealthApi.Services;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace HealthApi.Controllers
 {
@@ -12,11 +8,17 @@ namespace HealthApi.Controllers
     [ApiController]
     public class SearchController : ControllerBase
     {
-        [HttpGet("{id}")]
-        public ActionResult<SearchDto> GetByText([FromRoute] string searchText)
+        private readonly ISearchService _searchService;
+        public SearchController(ISearchService searchService)
         {
-            //var result = _bookService.GetByBookId(id);
-            return Ok(null);
+            _searchService = searchService;
+        }
+
+        [HttpGet("{searchPhrase}")]
+        public ActionResult<SearchDto> GetByString([FromRoute] string searchPhrase)
+        {
+            var result = _searchService.GetByString(searchPhrase);
+            return Ok(result);
         }
     }
 }

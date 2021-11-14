@@ -12,7 +12,7 @@ namespace HealthApi.Services
 {
     public interface ISearchService
     {
-        List<SearchDto> GetById(string searchText);
+        List<SearchDto> GetByString(string searchText);
     }
 
     public class SearchService : ISearchService
@@ -25,7 +25,7 @@ namespace HealthApi.Services
             _context = context;
             _mapper = mapper;
         }
-        public List<SearchDto> GetById(string searchText)
+        public List<SearchDto> GetByString(string searchText)
         {
             List<SearchDto> result = (List<SearchDto>)(from book in _context.Books where book.Name.Contains(searchText)
                                  join authorBook in _context.AuthorBooks on book.Id equals authorBook.BookId
@@ -45,39 +45,6 @@ namespace HealthApi.Services
             }
 
             return result;
-        }
-
-        public BookDto GetByBookId(Guid bookID)
-        {
-            return _context.Books
-           .Where(x => x.Id == bookID)
-           .Select(a => new BookDto
-                    {
-                        Id = a.Id,
-                        Name = a.Name,
-                        Slug = a.Slug,
-                        SlugName = a.SlugName,
-                        CategoryId = a.BookCategories.FirstOrDefault(x => x.BookId == a.Id).CategoryId,
-                        AuthorId = a.AuthorBooks.FirstOrDefault(x => x.BookId == a.Id).AuthorId
-           }).FirstOrDefault();
-        }
-
-        public PageResult<BookDto> GetAll(int page, int pageSize)
-        {
-            IQueryable<BookDto> result = _context.Books
-           .Select(a =>
-               new BookDto
-               {
-                   Id = a.Id,
-                   Name = a.Name,
-                   Slug = a.Slug,
-                   SlugName = a.SlugName,
-                   CategoryId = a.BookCategories.Select(p => p.Category.Id).FirstOrDefault(),
-                   CategoryName = a.BookCategories.Select(p => p.Category.Name).FirstOrDefault(),
-                   AuthorId = a.AuthorBooks.Select(p => p.Author.Id).FirstOrDefault(),
-                   AuthorFullName = a.AuthorBooks.Select(p => p.Author.Name + p.Author.Surname).FirstOrDefault(),
-               });
-           return result.GetPaged(page, pageSize);
         }
     }
 }
