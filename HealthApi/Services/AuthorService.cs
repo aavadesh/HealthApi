@@ -71,12 +71,12 @@ namespace HealthApi.Services
 
         public List<Author> GetAll()
         {
-            return _context.Authors.ToList();
+            return _context.Authors.OrderBy(x => x.Id).ToList();
         }
 
         public PageResult<Author> GetAll(int page, int pageSize)
         {
-            return _context.Authors.GetPaged(page, pageSize);
+            return _context.Authors.OrderBy(x => x.Id).GetPaged(page, pageSize);
         }
 
         public void RemoveById(Guid authorID)
