@@ -28,21 +28,21 @@ namespace HealthApi
         }
 
         [HttpPost]
-        public HttpResponseMessage Create([FromBody] BookContent bookContentDto)
+        public IActionResult Create([FromBody] BookContent bookContentDto)
         {
             _bookContentService.Create(bookContentDto);
-            var response = new HttpResponseMessage()
-            {
-                StatusCode = HttpStatusCode.OK
-            };
-
-            return response;
+            return Ok();
         }
 
         public IActionResult Update([FromBody] BookContent bookContentDto)
         {
             try
             {
+                if (_bookContentService.IsExists(bookContentDto) > 0)
+                {
+                    return StatusCode(409, $"User '{bookContentDto.Content}' already exists.");
+                }
+
                 _bookContentService.Update(bookContentDto);
                 return NoContent();
             }

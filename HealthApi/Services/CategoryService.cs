@@ -74,11 +74,11 @@ namespace HealthApi.Services
         }
         public List<Category> GetAll()
         {
-            return _context.Categories.OrderBy(x => x.Id).ToList();
+            return _context.Categories.OrderByDescending(x => x.Id).ToList();
         }
         public PageResult<Category> GetAll(int page, int pageSize)
         {
-            return _context.Categories.OrderBy(x => x.Id).GetPaged(page, pageSize);
+            return _context.Categories.OrderByDescending(x => x.Id).GetPaged(page, pageSize);
         }
 
         public void RemoveById(Guid authorID)

@@ -119,7 +119,7 @@ namespace HealthApi.Services
 
         public List<Book> GetAll()
         {
-            return _context.Books.OrderBy(x => x.Id).ToList();
+            return _context.Books.OrderByDescending(x => x.Id).ToList();
         }
 
         public BookDto GetByBookId(Guid bookID)
@@ -152,7 +152,7 @@ namespace HealthApi.Services
                    AuthorId = a.AuthorBooks.Select(p => p.Author.Id).FirstOrDefault(),
                    AuthorFullName = a.AuthorBooks.Select(p => p.Author.Name + p.Author.Surname).FirstOrDefault(),
                });
-           return result.OrderBy(x => x.Id).GetPaged(page, pageSize);
+           return result.OrderByDescending(x => x.Id).GetPaged(page, pageSize);
         }
 
         public void RemoveById(Guid bookID)

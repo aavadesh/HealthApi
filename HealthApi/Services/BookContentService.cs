@@ -15,6 +15,7 @@ namespace HealthApi.Services
         BookContent GetById(Guid bookID);
         PageResult<BookContentDto> GetAll(int page, int pageSize);
         void RemoveById(Guid bookID);
+        int IsExists(BookContent bookContentDto);
     }
 
     public class BookContentService : IBookContentService
@@ -36,11 +37,16 @@ namespace HealthApi.Services
                         Id = e.Id,
                         BookName = d.Name,
                         BookId = d.Id,
-                        Content = e.Content,
+                        Content = e.Content.Substring(0, 200),
                         pageNumber = e.PageNumber
                     }).OrderBy(x => x.BookName).ThenBy(x => x.pageNumber);
 
             return result.GetPaged(page, pageSize);
+        }
+
+        public int IsExists(BookContent bookContentDto)
+        {
+            return _context.BookContents.Count(x => x.BookId == bookContentDto.BookId && x.PageNumber == bookContentDto.PageNumber);
         }
 
         public Guid Create(BookContent bookContentDto)
@@ -50,6 +56,8 @@ namespace HealthApi.Services
 
             return bookContentDto.BookId;
         } 
+
+
         public BookContent GetById(Guid bookID)
         {
            return _context.BookContents.FirstOrDefault(x => x.BookId == bookID);
@@ -59,6 +67,7 @@ namespace HealthApi.Services
         {
             BookContent bookContent = _context.BookContents.FirstOrDefault(d => d.BookId == bookID);
             _context.RemoveRange(bookContent);
+            _context.SaveChanges();
         } 
         public BookContent Update(BookContent bookContentDto)
         {
