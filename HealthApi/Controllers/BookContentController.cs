@@ -30,6 +30,11 @@ namespace HealthApi
         [HttpPost]
         public IActionResult Create([FromBody] BookContent bookContentDto)
         {
+            if (_bookContentService.IsExists(bookContentDto) > 0)
+            {
+                return StatusCode(409, $"of the book already exists in the database.");
+            }
+
             _bookContentService.Create(bookContentDto);
             return Ok();
         }
@@ -38,11 +43,6 @@ namespace HealthApi
         {
             try
             {
-                if (_bookContentService.IsExists(bookContentDto) > 0)
-                {
-                    return StatusCode(409, $"User '{bookContentDto.Content}' already exists.");
-                }
-
                 _bookContentService.Update(bookContentDto);
                 return NoContent();
             }
