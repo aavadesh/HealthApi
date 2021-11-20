@@ -66,5 +66,13 @@ namespace HealthApi
             var result = _bookContentService.GetAll(page, pageSize);
             return Ok(result);
         }
+
+        [HttpGet]
+        [Route("Search")]
+        public ActionResult<List<BookContentDto>> GetAll([FromQuery] string q)
+        {
+            var result = _bookContentService.GetByString(q);
+            return Ok(result);
+        }
     }
 }

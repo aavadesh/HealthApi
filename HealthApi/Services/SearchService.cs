@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity.Core.Objects;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using AutoMapper;
 using HealthApi.Entities;
@@ -27,17 +29,23 @@ namespace HealthApi.Services
         }
         public List<SearchDto> GetByString(string searchText)
         {
-            List<SearchDto> result = (List<SearchDto>)(from book in _context.Books where book.Name.Contains(searchText)
-                                 join authorBook in _context.AuthorBooks on book.Id equals authorBook.BookId
-                                 join author in _context.Authors on authorBook.AuthorId equals author.Id where author.Name.Contains(searchText) || author.Surname.Contains(searchText)
-                                 join bookContent in _context.BookContents on book.Id equals bookContent.BookId
-                                 select new SearchDto
-                                 {
-                                     BookId = book.Id,
-                                     BookName = book.Name,
-                                     PagesNumber = bookContent.PageNumber,
-                                     AuthorFullName = author.Name + " " + author.Surname
-                                 }).OrderBy(o => o.PagesNumber).ToList().GroupBy(h => h.PagesNumber);
+            //var bookContent = String.Join(",", _context.BookContents.Select(p => p.PageNumber));
+            string sql = @"select t2.Name as BookName,t2.Id as BookId, t4.Name, t4.Surname,
+                                   isnull(STUFF(
+                                       (SELECT distinct ', ' + CONVERT(varchar(10),t1.PageNumber)
+	                                  FROM BookContents t1 inner join Books t on t1.BookId = t.Id 
+	                                  where t2.Id = t.Id FOR XML PATH('')), 1, 1, ''), 'Search Phase not found') Page
+                                from Books t2 
+	                                  inner join AuthorBooks t3 on t2.Id = t3.BookId
+	                                  inner join Authors t4 on t3.AuthorId = t4.Id
+	                                  Where t2.Name like '%"+ searchText + "%' or t4.Name like '%" + searchText + "%' or t4.Surname like '%" + searchText + "%' ";
+            var objctx = (_context as IObjectContextAdapter).ObjectContext;
+
+            ObjectQuery<SearchDto> searchResult = objctx.CreateQuery<SearchDto>(sql);
+
+
+
+            List<SearchDto> result = searchResult.ToList();
 
             if (result is null)
             {

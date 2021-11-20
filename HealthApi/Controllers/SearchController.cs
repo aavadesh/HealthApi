@@ -1,6 +1,7 @@
 ﻿using HealthApi.Models;
 using HealthApi.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
 namespace HealthApi.Controllers
 {
@@ -14,11 +15,17 @@ namespace HealthApi.Controllers
             _searchService = searchService;
         }
 
-        [HttpGet("{searchPhrase}")]
-        public ActionResult<SearchDto> GetByString([FromRoute] string searchPhrase)
+
+        [HttpGet]
+        public ActionResult<List<SearchDto>> GetAll([FromQuery] string q)
         {
-            var result = _searchService.GetByString(searchPhrase);
-            return Ok(result);
+            var result = _searchService.GetByString(q);
+            if (result.Count > 0)
+            {
+                return Ok(result);
+            }
+
+            return NotFound();
         }
     }
 }

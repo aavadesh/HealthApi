@@ -1,4 +1,5 @@
 ﻿
+using HealthApi.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace HealthApi.Entities
@@ -16,12 +17,16 @@ namespace HealthApi.Entities
         public DbSet<Category> Categories { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
-
+        public virtual DbSet<SearchDto> Search { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<BookCategory>().HasKey(sc => new { sc.CategoryId, sc.BookId });
             modelBuilder.Entity<AuthorBook>().HasKey(sc => new { sc.BookId, sc.AuthorId });
-
+            // Necessary, since our model isnt a EF model
+            modelBuilder.Entity<SearchDto>(entity =>
+            {
+                entity.HasNoKey();
+            });
             modelBuilder.Entity<Role>()
         .HasData(
             new Role
