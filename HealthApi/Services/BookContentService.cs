@@ -51,17 +51,17 @@ namespace HealthApi.Services
 
         public List<SearchDto> GetByString(string searchText)
         {
-            //var bookContent = String.Join(",", _context.BookContents.Select(p => p.PageNumber));
+            //'%" + searchText + "%';
 
-            string sql = @"select t2.Name as BookName,t2.Id as BookId, t4.Name as AuthorName, t4.Surname as AuthorSurname,
-                                   isnull(STUFF(
-                                       (SELECT distinct ', ' + CONVERT(varchar(10),t1.PageNumber)
-	                                  FROM BookContents t1 inner join Books t on t1.BookId = t.Id 
-	                                  where t2.Id = t.Id FOR XML PATH('')), 1, 1, ''), 'Search Phase not found') PagesNumber
-                                from Books t2 
-	                                  inner join AuthorBooks t3 on t2.Id = t3.BookId
-	                                  inner join Authors t4 on t3.AuthorId = t4.Id
-	                                  Where t2.Name like '%" + searchText + "%' or t4.Name like '%" + searchText + "%' or t4.Surname like '%" + searchText + "%' ";
+            string sql = @"select distinct t2.Name as BookName,t2.Id as BookId, t4.Name as AuthorName, t4.Surname as AuthorSurname,
+isnull(STUFF(
+(SELECT distinct ', ' + CONVERT(varchar(10),t1.PageNumber)
+FROM BookContents t1 inner join Books t on t1.BookId = t.Id 
+where t2.Id = t.Id FOR XML PATH('')), 1, 1, ''), 'Search Phase not found') PagesNumber from BookContents content
+inner join Books t2 on t2.Id = content.BookId 
+inner join AuthorBooks t3 on t2.Id = t3.BookId 
+inner join Authors t4 on t3.AuthorId = t4.Id 
+Where t2.Name like '%" + searchText + "%' or t4.Name like '%" + searchText + "%' or t4.Surname like '%" + searchText + "%' or content.Content like '%" + searchText + "%'";
 
             List<SearchDto> searchResult = _context.Set<SearchDto>().FromSqlRaw(sql).ToList();
 

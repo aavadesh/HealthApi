@@ -34,11 +34,10 @@ namespace HealthApi.Services
                                    isnull(STUFF(
                                        (SELECT distinct ', ' + CONVERT(varchar(10),t1.PageNumber)
 	                                  FROM BookContents t1 inner join Books t on t1.BookId = t.Id 
-	                                  where t2.Id = t.Id FOR XML PATH('')), 1, 1, ''), 'Search Phase not found') Page
-                                from Books t2 
-	                                  inner join AuthorBooks t3 on t2.Id = t3.BookId
-	                                  inner join Authors t4 on t3.AuthorId = t4.Id
-	                                  Where t2.Name like '%"+ searchText + "%' or t4.Name like '%" + searchText + "%' or t4.Surname like '%" + searchText + "%' ";
+	                                  where t1.Content like '%" + searchText + "%' and t2.Id = t.Id FOR XML PATH('')), 1, 1, ''), 'Search Phase not found') Page "+
+                                      "from Books t2 inner join AuthorBooks t3 on t2.Id = t3.BookId "+
+	                                  "inner join Authors t4 on t3.AuthorId = t4.Id "+
+	                                  "Where t2.Name like '%" + searchText + "%' or t4.Name like '%" + searchText + "%' or t4.Surname like '%" + searchText + "%' ";
             var objctx = (_context as IObjectContextAdapter).ObjectContext;
 
             ObjectQuery<SearchDto> searchResult = objctx.CreateQuery<SearchDto>(sql);
