@@ -51,28 +51,64 @@ namespace HealthApi.Services
 
         public List<SearchDto> GetByString(string searchText)
         {
-            //'%" + searchText + "%';
+                    var res = from bookContent in _context.BookContents
 
-            string sql = @"select distinct t2.Name as BookName,t2.Id as BookId, t4.Name as AuthorName, t4.Surname as AuthorSurname,
-isnull(STUFF(
-(SELECT distinct ', ' + CONVERT(varchar(10),t1.PageNumber)
-FROM BookContents t1 inner join Books t on t1.BookId = t.Id 
-where t2.Id = t.Id FOR XML PATH('')), 1, 1, ''), 'Search Phase not found') PagesNumber from BookContents content
-inner join Books t2 on t2.Id = content.BookId 
-inner join AuthorBooks t3 on t2.Id = t3.BookId 
-inner join Authors t4 on t3.AuthorId = t4.Id 
-Where t2.Name like '%" + searchText + "%' or t4.Name like '%" + searchText + "%' or t4.Surname like '%" + searchText + "%' or content.Content like '%" + searchText + "%'";
+                          /* Books */
+                      join book in _context.Books on bookContent.BookId equals book.Id
 
-            List<SearchDto> searchResult = _context.Set<SearchDto>().FromSqlRaw(sql).ToList();
+                      /* Categories */
+                      join pivotBookCategories in _context.BookCategories on book.Id equals pivotBookCategories.BookId
+                      join category in _context.Categories on pivotBookCategories.CategoryId equals category.Id
 
-            List<SearchDto> result = searchResult.ToList();
+                      /* Authors */
+                      join pivotAuthorBooks in _context.AuthorBooks on book.Id equals pivotAuthorBooks.BookId
+                      join author in _context.Authors on pivotAuthorBooks.AuthorId equals author.Id
 
-            if (result is null)
+                      where bookContent.Content.Contains(searchText)
+                      select new
+                      {
+                          PagesNumber = bookContent.PageNumber,
+                          BookId = book.Id,
+                          BookName = book.Name,
+                          AuthorName = author.Name,
+                          AuthorSurname = author.Surname
+                      };
+
+            var result = res.ToList();
+            var usersGroupedByCountry = result.GroupBy(user => user.BookId);
+            List<SearchDto> list = new List<SearchDto>();
+            SearchDto searchDto;
+            foreach (var group in usersGroupedByCountry)
+            {
+                searchDto = new SearchDto();
+
+                searchDto.BookName = group.Select(x => x.BookName).FirstOrDefault();
+                searchDto.BookId = group.Select(x => x.BookId).FirstOrDefault();
+                searchDto.AuthorName = group.Select(x => x.AuthorName).FirstOrDefault();
+                searchDto.AuthorSurname = group.Select(x => x.AuthorSurname).FirstOrDefault();
+
+                foreach (var user in group)
+                {
+                    if (!string.IsNullOrEmpty(user.PagesNumber.ToString()))
+                    {
+                        searchDto.PagesNumber += user.PagesNumber.ToString() + ",";
+                    }
+                    else
+                    {
+                        searchDto.PagesNumber += "Search phrase not found";
+                    }
+                }
+
+                searchDto.PagesNumber = searchDto.PagesNumber.TrimEnd(',');
+
+                list.Add(searchDto);
+            }
+            if (list is null)
             {
                 throw new NotFoundException("Book not found");
             }
 
-            return result;
+            return list;
         }
 
         public int IsExists(BookContent bookContentDto)

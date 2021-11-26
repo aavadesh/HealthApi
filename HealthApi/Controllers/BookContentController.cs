@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Web;
 
 namespace HealthApi
 {
@@ -71,7 +72,9 @@ namespace HealthApi
         [Route("Search")]
         public ActionResult<List<BookContentDto>> GetAll([FromQuery] string q)
         {
-            var result = _bookContentService.GetByString(q);
+            var encodedData = Convert.FromBase64String(q);
+            var decodedString = System.Text.Encoding.UTF8.GetString(encodedData);
+            var result = _bookContentService.GetByString(decodedString);
             return Ok(result);
         }
     }
