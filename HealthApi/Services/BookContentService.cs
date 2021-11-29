@@ -51,64 +51,25 @@ namespace HealthApi.Services
 
         public List<SearchDto> GetByString(string searchText)
         {
-                    var res = from bookContent in _context.BookContents
+            string sql = @"select distinct t2.Name as BookName,t2.Id as BookId, t4.Name as AuthorName, t4.Surname as AuthorSurname,
+                            isnull(STUFF(
+                            (SELECT  distinct ', ' + CONVERT(varchar(10),t1.PageNumber)
+                            FROM BookContents t1  join Books t on t1.BookId = t.Id 
+                            where t2.Id = t.Id FOR XML PATH('')), 1, 1, ''), 'Search Phase not found') PagesNumber from BookContents content
+                            join Books t2 on t2.Id = content.BookId 
+                            left join AuthorBooks t3 on t2.Id = t3.BookId 
+                            left join Authors t4 on t3.AuthorId = t4.Id 
+                            Where content.Content like '%" + searchText + "%'";
 
-                          /* Books */
-                      join book in _context.Books on bookContent.BookId equals book.Id
+            List<SearchDto> search = _context.Set<SearchDto>().FromSqlRaw(sql).ToList();
 
-                      /* Categories */
-                      join pivotBookCategories in _context.BookCategories on book.Id equals pivotBookCategories.BookId
-                      join category in _context.Categories on pivotBookCategories.CategoryId equals category.Id
-
-                      /* Authors */
-                      join pivotAuthorBooks in _context.AuthorBooks on book.Id equals pivotAuthorBooks.BookId
-                      join author in _context.Authors on pivotAuthorBooks.AuthorId equals author.Id
-
-                      where bookContent.Content.Contains(searchText)
-                      select new
-                      {
-                          PagesNumber = bookContent.PageNumber,
-                          BookId = book.Id,
-                          BookName = book.Name,
-                          AuthorName = author.Name,
-                          AuthorSurname = author.Surname
-                      };
-
-            var result = res.ToList();
-            var usersGroupedByCountry = result.GroupBy(user => user.BookId);
-            List<SearchDto> list = new List<SearchDto>();
-            SearchDto searchDto;
-            foreach (var group in usersGroupedByCountry)
-            {
-                searchDto = new SearchDto();
-
-                searchDto.BookName = group.Select(x => x.BookName).FirstOrDefault();
-                searchDto.BookId = group.Select(x => x.BookId).FirstOrDefault();
-                searchDto.AuthorName = group.Select(x => x.AuthorName).FirstOrDefault();
-                searchDto.AuthorSurname = group.Select(x => x.AuthorSurname).FirstOrDefault();
-
-                foreach (var user in group)
-                {
-                    if (!string.IsNullOrEmpty(user.PagesNumber.ToString()))
-                    {
-                        searchDto.PagesNumber += user.PagesNumber.ToString() + ",";
-                    }
-                    else
-                    {
-                        searchDto.PagesNumber += "Search phrase not found";
-                    }
-                }
-
-                searchDto.PagesNumber = searchDto.PagesNumber.TrimEnd(',');
-
-                list.Add(searchDto);
-            }
-            if (list is null)
+            
+            if (search is null)
             {
                 throw new NotFoundException("Book not found");
             }
 
-            return list;
+            return search;
         }
 
         public int IsExists(BookContent bookContentDto)
@@ -125,14 +86,14 @@ namespace HealthApi.Services
         } 
 
 
-        public BookContent GetById(Guid bookID)
+        public BookContent GetById(Guid Id)
         {
-           return _context.BookContents.FirstOrDefault(x => x.BookId == bookID);
+           return _context.BookContents.FirstOrDefault(x => x.Id == Id);
         }
 
-        public void RemoveById(Guid bookID)
+        public void RemoveById(Guid Id)
         {
-            BookContent bookContent = _context.BookContents.FirstOrDefault(d => d.BookId == bookID);
+            BookContent bookContent = _context.BookContents.FirstOrDefault(d => d.Id == Id);
             _context.RemoveRange(bookContent);
             _context.SaveChanges();
         } 
@@ -140,7 +101,7 @@ namespace HealthApi.Services
         {
             try
             {
-                var bookContentEntity = GetById(bookContentDto.BookId);
+                var bookContentEntity = GetById(bookContentDto.Id);
                 if (bookContentEntity == null)
                 {
                     throw new NotFoundException("BookContent not found");
