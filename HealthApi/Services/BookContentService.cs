@@ -51,25 +51,42 @@ namespace HealthApi.Services
 
         public List<SearchDto> GetByString(string searchText)
         {
-            string sql = @"select distinct t2.Name as BookName,t2.Id as BookId, t4.Name as AuthorName, t4.Surname as AuthorSurname,
-                            isnull(STUFF(
-                            (SELECT  distinct ', ' + CONVERT(varchar(10),t1.PageNumber)
-                            FROM BookContents t1  join Books t on t1.BookId = t.Id 
-                            where t2.Id = t.Id FOR XML PATH('')), 1, 1, ''), 'Search Phase not found') PagesNumber from BookContents content
-                            join Books t2 on t2.Id = content.BookId 
-                            left join AuthorBooks t3 on t2.Id = t3.BookId 
-                            left join Authors t4 on t3.AuthorId = t4.Id 
-                            Where content.Content like '%" + searchText + "%'";
+            var bookContentList = (from bookContent in _context.BookContents.AsEnumerable()
+                                   where bookContent.Content.Contains(searchText)
+                      group bookContent by bookContent.BookId into g
+                                   join book in _context.Books on g.Key equals book.Id
+                                   select new { book.Name, g.Key, Items = string.Join(",", g.Select(sel => sel.PageNumber.ToString())), g }).ToList();
 
-            List<SearchDto> search = _context.Set<SearchDto>().FromSqlRaw(sql).ToList();
+            var final = bookContentList.GroupBy(p => p.Key).Select(s => s.First());
+            List<SearchDto> TstList = new List<SearchDto>();
+            SearchDto searchDto = new SearchDto();
+            foreach (var item in final)
+            {
+                searchDto = new SearchDto();
+                searchDto.BookId = item.Key;
+                searchDto.BookName = item.Name;
+                searchDto.PagesNumber = item.Items;
+                TstList.Add(searchDto);
+            }
 
-            
-            if (search is null)
+            var result = (from bookContent in TstList
+                          join bookAuthor in _context.AuthorBooks on bookContent.BookId equals bookAuthor.BookId
+                          join author in _context.Authors on bookAuthor.AuthorId equals author.Id
+                          select new SearchDto
+                          {
+                              PagesNumber = bookContent.PagesNumber,
+                              BookId = bookContent.BookId,
+                              BookName = bookContent.BookName,
+                              AuthorName = author.Name,
+                              AuthorSurname = author.Surname
+                          }).ToList();
+
+            if (result is null)
             {
                 throw new NotFoundException("Book not found");
             }
 
-            return search;
+            return result;
         }
 
         public int IsExists(BookContent bookContentDto)
