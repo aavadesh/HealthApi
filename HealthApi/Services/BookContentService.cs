@@ -53,9 +53,9 @@ namespace HealthApi.Services
         {
             var bookContentList = (from bookContent in _context.BookContents.AsEnumerable()
                                    where bookContent.Content.Contains(searchText)
-                      group bookContent by bookContent.BookId into g
+                                    group bookContent by bookContent.BookId into g
                                    join book in _context.Books on g.Key equals book.Id
-                                   select new { book.Name, g.Key, Items = string.Join(",", g.Select(sel => sel.PageNumber.ToString())), g }).ToList();
+                                   select new { book.Name, g.Key, Items = string.Join(",", g.Select(sel => sel.PageNumber)) }).ToList();
 
             var final = bookContentList.GroupBy(p => p.Key).Select(s => s.First());
             List<SearchDto> TstList = new List<SearchDto>();
@@ -74,7 +74,7 @@ namespace HealthApi.Services
                           join author in _context.Authors on bookAuthor.AuthorId equals author.Id
                           select new SearchDto
                           {
-                              PagesNumber = bookContent.PagesNumber,
+                              PagesNumber = String.Join(",", bookContent.PagesNumber.Split(',').Select(c => Convert.ToInt32(c)).OrderBy(i => i)), //bookContent.PagesNumber,
                               BookId = bookContent.BookId,
                               BookName = bookContent.BookName,
                               AuthorName = author.Name,
